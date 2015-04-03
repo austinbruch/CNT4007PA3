@@ -24,10 +24,19 @@ public class LinkState {
 
    private ArrayList<Node> nodes;
 
+   private ArrayList<Integer> distances;
+
+   private ArrayList<String> pValues;
+
+   private String header;
+
    public LinkState(String networkFile) {
       this.networkFile = networkFile;
       this.numNodes = 0;
       this.nodes = new ArrayList<Node>();
+      this.header = null;
+      this.distances = new ArrayList<Integer>();
+      this.pValues = new ArrayList<String>();
    }
 
    private void initialize() {
@@ -40,6 +49,8 @@ public class LinkState {
       }
    }
 
+   // Parses the Network file
+   // Creates all Nodes and adds them to this LinkState's ArrayList of Nodes
    private void parseNetworkFile() {
 
       int currentNode = 0;
@@ -54,6 +65,7 @@ public class LinkState {
 
                Node node = new Node(currentNode);
                node.parseCosts(temp);
+               this.nodes.add(node);
 
             }
             
@@ -72,8 +84,51 @@ public class LinkState {
 
       System.out.println("Number of Nodes in this Network: " + this.numNodes);
 
+   }
 
+   private void route(int sourceNodeIndex) {
+      this.header = buildHeader(sourceNodeIndex);
+      printDashedLine();
+      System.out.println(header);
+      printDashedLine();
 
+   }
+
+   // Print the header for the Dijkstra's Algorithm output
+   // Specify which source node we are using to not print columns for that Node
+   private String buildHeader(int sourceNodeIndex) {
+      String header = "";
+
+      header += "Step\t";
+
+      int numTabsNeeded = this.numNodes / 6;
+      if (this.numNodes % 6 != 0) {
+         numTabsNeeded++;
+      }
+
+      header += "N\'";
+
+      for (int i = 0; i < numTabsNeeded; i++) {
+         header += "\t";
+      }
+
+      for (int i = 1; i <= this.numNodes; i++) {
+         if (i != sourceNodeIndex) {
+            header += "D(" + i + "),p(" + i + ")\t";
+         }
+      }
+
+      return header;
+   }
+
+   private void printDashedLine() {
+      String dashes = "";
+      int numTabs = this.header.length() - this.header.replace("\t","").length();
+      for (int i = 0; i < this.header.length() + (numTabs * 6); i++) {
+         dashes += "-";
+      }
+
+      System.out.println(dashes);
    }
 
    // Execute the LinkState routing process
@@ -81,8 +136,12 @@ public class LinkState {
       // Initialize the Network File Reader
       this.initialize();
 
-      // Parse the Network File to create the Network
+      // Parse the Network File to create the Network of Nodes
       this.parseNetworkFile();
+
+      // Perform the Dijkstra's Shortest-Path Algorithm on the specified source node
+      // Note: this is hard coded to Node 1 based on assignment specifications
+      this.route(1);
    }
 
    // Used to drive the LinkState program
