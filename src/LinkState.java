@@ -225,17 +225,19 @@ public class LinkState {
 
       String nSetContents = this.getContentsOfNSet();
       int numTabsToSubtract = nSetContents.length() / 6;
-      if (nSetContents.length() % 6 != 0) {
+      if (nSetContents.length() % 6 != 0 && nSetContents.length() / 6 != 0) {
          numTabsToSubtract++;
       }
 
       numTabsNeeded = numTabsNeeded - numTabsToSubtract;
       
-      for (int i = 0; i < numTabsNeeded; i++) {
+      statusLine += nSetContents;
+
+      for (int i = 0; i <= numTabsNeeded; i++) {
          statusLine += "\t";   
       }
 
-      statusLine += nSetContents + "\t\t";
+      
 
       for (int i = 0; i < this.nodes.size(); i++) {
          int j = i + 1;
