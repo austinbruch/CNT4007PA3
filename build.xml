@@ -1,0 +1,11 @@
+<project name="Programming Assignment 3" default="compile">
+   <target name="clean">
+      <delete dir="bin"/>
+   </target>
+   
+   <target name="compile">
+         <mkdir dir="bin"/>
+         <javac includeantruntime="false" srcdir="src" destdir="bin">
+         </javac>
+   </target>
+</project>
