@@ -74,7 +74,7 @@ public class LinkState {
             if (!temp.equals("EOF.")) {
                this.numNodes++;
                currentNode++;
-               System.out.println(temp);
+               // System.out.println(temp);
 
                Node node = new Node(currentNode);
                node.parseCosts(temp);
@@ -95,7 +95,7 @@ public class LinkState {
          }
       }
 
-      System.out.println("Number of Nodes in this Network: " + this.numNodes);
+      // System.out.println("Number of Nodes in this Network: " + this.numNodes);
 
    }
 
@@ -126,7 +126,63 @@ public class LinkState {
       this.printStatusLine(sourceNodeIndex);
       this.printDashedLine();
 
-      this.step++;
+      // Looping stage
+
+      while (this.nSet.size() != this.numNodes) {
+         this.step++;
+         int min = -1;
+         int toAdd = sourceNodeIndex - 1;
+         
+         // Iterate through the distance ArrayList, looking for a minimum Distance value for a node that is not in N'
+         // Iterate backwards because in the case of a tie in the distance, we want to take the node with the smaller node number, as per assignment instructions
+         for (int i = this.distances.size()-1; i >= 0; i--) {
+            int oneBasedIndex = i + 1; 
+            if (!this.nSet.contains(oneBasedIndex)) {
+               if (min == -1) { // If min is infinity, add the next node because it's either smaller or the same
+                  min = this.distances.get(i);
+                  toAdd = i;
+               } else { // If min is not infinity
+                  if (min >= this.distances.get(i)) { // If the current iterating distance is less than or equal to the current min, replace min with this distance value
+                     min = this.distances.get(i);
+                     toAdd = i;
+                  }
+               }
+            }
+         }
+
+         // At this point, we know the index (0 based) of the Node to add to N'
+         this.nSet.add(toAdd + 1);
+
+         // Update the distances ArrayList (D()) for each node
+         // The new distance value is either the old value, or the least cost value to the node that was just added to N', PLUS the cost from that new node to each node
+
+         Node addedNode = this.nodes.get(toAdd);
+         for (Node n : this.nodes) {
+            if (!this.nSet.contains(n.getNodeIndex())) { // the iterating node isn't in N'
+               // if neighbor
+               if (addedNode.getDistanceToNode(n.getNodeIndex()) != -1){
+
+                  // If the new path is shorter than the old path, update it to show 
+                  if (this.distances.get(n.getNodeIndex()-1) != -1) {
+                     if (this.distances.get(n.getNodeIndex()-1) > this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n.getNodeIndex())) {
+                        this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n.getNodeIndex()));
+                        this.pValues.set(n.getNodeIndex()-1, addedNode.getNodeIndex());
+                     }
+                  } else {
+                     this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n.getNodeIndex()));
+                     this.pValues.set(n.getNodeIndex()-1, addedNode.getNodeIndex());
+                  }
+                  
+               } else { // Not a direct neighbor --> infinity
+                  // Do nothing here, don't update the values in either D() or p()
+               }
+            }
+         }
+
+         this.printStatusLine(sourceNodeIndex);
+         this.printDashedLine();
+      }
+      
 
    }
 
@@ -144,7 +200,7 @@ public class LinkState {
 
       header += "N\'";
 
-      for (int i = 0; i < numTabsNeeded; i++) {
+      for (int i = 0; i <= numTabsNeeded; i++) {
          header += "\t";
       }
 
@@ -162,37 +218,43 @@ public class LinkState {
 
       statusLine += this.step + "\t";
 
-      int numTabsNeeded = this.numNodes / 6;
+      int numTabsNeeded = this.numNodes  / 6;
       if (this.numNodes % 6 != 0) {
          numTabsNeeded++;
       }
 
-      String nSetContents = getContentsOfNSet();
+      String nSetContents = this.getContentsOfNSet();
       int numTabsToSubtract = nSetContents.length() / 6;
       if (nSetContents.length() % 6 != 0) {
          numTabsToSubtract++;
       }
 
-      numTabsNeeded -= numTabsToSubtract;
+      numTabsNeeded = numTabsNeeded - numTabsToSubtract;
       
       for (int i = 0; i < numTabsNeeded; i++) {
          statusLine += "\t";   
       }
 
-      statusLine += nSetContents + "\t";
+      statusLine += nSetContents + "\t\t";
 
       for (int i = 0; i < this.nodes.size(); i++) {
          int j = i + 1;
          if (j != sourceNodeIndex) {
-            int distance = this.distances.get(i);
-            int pValue = this.pValues.get(i);
+            if (!this.nSet.contains(j)) {
+            // if (true) { // Debug purposes only
+               int distance = this.distances.get(i);
+               int pValue = this.pValues.get(i);
 
-            if (distance == -1) {
-               statusLine += "N\t\t";
+               if (distance == -1) {
+                  statusLine += "N\t\t";
+               } else {
+                  statusLine += distance + "," + pValue + "\t\t"; 
+               }
             } else {
-               statusLine += distance + "," + pValue + "\t\t"; 
-            }  
+               statusLine += "\t\t";
+              
          }
+            }
       }
       
       System.out.println(statusLine);
