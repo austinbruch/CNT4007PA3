@@ -22,10 +22,13 @@ public class LinkState {
    // The number of nodes in the network that this LinkState instance is working with
    private int numNodes;
 
+   // List of all Nodes in this Network, in order from 1 to N
    private ArrayList<Node> nodes;
 
+   // Distances from the specified Source Node to each other Node in the Network
    private ArrayList<Integer> distances;
 
+   // P Values for each Node 
    private ArrayList<String> pValues;
 
    private String header;
@@ -57,7 +60,6 @@ public class LinkState {
       String temp = null;
       try {
          while( (temp = this.networkFileBufferedReader.readLine()) != null ) {
-            // input += temp;
             if (!temp.equals("EOF.")) {
                this.numNodes++;
                currentNode++;
@@ -66,9 +68,7 @@ public class LinkState {
                Node node = new Node(currentNode);
                node.parseCosts(temp);
                this.nodes.add(node);
-
             }
-            
          }
       } catch (IOException e) {
          System.out.println("An I/O Error occurred while reading the Network file.");
@@ -86,6 +86,7 @@ public class LinkState {
 
    }
 
+   // Perform the Dijkstra's Algorithm routing
    private void route(int sourceNodeIndex) {
       this.header = buildHeader(sourceNodeIndex);
       printDashedLine();
@@ -121,6 +122,7 @@ public class LinkState {
       return header;
    }
 
+   // Prints a line of dashes of the appropriate length
    private void printDashedLine() {
       String dashes = "";
       int numTabs = this.header.length() - this.header.replace("\t","").length();
