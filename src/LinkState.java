@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.StringTokenizer;
 
 public class LinkState {
@@ -26,12 +27,20 @@ public class LinkState {
    private ArrayList<Node> nodes;
 
    // Distances from the specified Source Node to each other Node in the Network
+   // Represents the D(node) values
    private ArrayList<Integer> distances;
 
+   // Represents the set N'
+   private ArrayList<Integer> nSet;
+
    // P Values for each Node 
-   private ArrayList<String> pValues;
+   // Represents the p(node) values
+   private ArrayList<Integer> pValues;
 
    private String header;
+
+   // Current step of the routing algorithm
+   private int step;
 
    public LinkState(String networkFile) {
       this.networkFile = networkFile;
@@ -39,7 +48,9 @@ public class LinkState {
       this.nodes = new ArrayList<Node>();
       this.header = null;
       this.distances = new ArrayList<Integer>();
-      this.pValues = new ArrayList<String>();
+      this.pValues = new ArrayList<Integer>();
+      this.nSet = new ArrayList<Integer>();
+      this.step = 0;
    }
 
    private void initialize() {
@@ -68,6 +79,8 @@ public class LinkState {
                Node node = new Node(currentNode);
                node.parseCosts(temp);
                this.nodes.add(node);
+               this.distances.add(-1);
+               this.pValues.add(0);
             }
          }
       } catch (IOException e) {
@@ -89,9 +102,31 @@ public class LinkState {
    // Perform the Dijkstra's Algorithm routing
    private void route(int sourceNodeIndex) {
       this.header = buildHeader(sourceNodeIndex);
-      printDashedLine();
+      this.printDashedLine();
       System.out.println(header);
-      printDashedLine();
+      this.printDashedLine();
+
+      // Initialize N'
+      this.nSet.add(new Integer(sourceNodeIndex));
+
+      Node sourceNode = this.nodes.get(sourceNodeIndex-1);
+
+      for (Node n : this.nodes) {
+         if (!n.equals(sourceNode)) { // not dealing with the source node
+            // if neighbor
+            if (sourceNode.getDistanceToNode(n.getNodeIndex()) != -1){
+               this.distances.set(n.getNodeIndex()-1, sourceNode.getDistanceToNode(n.getNodeIndex()));
+               this.pValues.set(n.getNodeIndex()-1, sourceNode.getNodeIndex());
+            } else { // Not a direct neighbor --> infinity
+               this.distances.set(n.getNodeIndex()-1, -1);
+            }
+         }
+      }
+
+      this.printStatusLine(sourceNodeIndex);
+      this.printDashedLine();
+
+      this.step++;
 
    }
 
@@ -120,6 +155,61 @@ public class LinkState {
       }
 
       return header;
+   }
+
+   private void printStatusLine(int sourceNodeIndex) {
+      String statusLine = "";
+
+      statusLine += this.step + "\t";
+
+      int numTabsNeeded = this.numNodes / 6;
+      if (this.numNodes % 6 != 0) {
+         numTabsNeeded++;
+      }
+
+      String nSetContents = getContentsOfNSet();
+      int numTabsToSubtract = nSetContents.length() / 6;
+      if (nSetContents.length() % 6 != 0) {
+         numTabsToSubtract++;
+      }
+
+      numTabsNeeded -= numTabsToSubtract;
+      
+      for (int i = 0; i < numTabsNeeded; i++) {
+         statusLine += "\t";   
+      }
+
+      statusLine += nSetContents + "\t";
+
+      for (int i = 0; i < this.nodes.size(); i++) {
+         int j = i + 1;
+         if (j != sourceNodeIndex) {
+            int distance = this.distances.get(i);
+            int pValue = this.pValues.get(i);
+
+            if (distance == -1) {
+               statusLine += "N\t\t";
+            } else {
+               statusLine += distance + "," + pValue + "\t\t"; 
+            }  
+         }
+      }
+      
+      System.out.println(statusLine);
+   }
+
+   private String getContentsOfNSet() {
+      String toReturn = "";
+
+      Collections.sort(this.nSet);
+
+      for (Integer i : nSet) {
+         toReturn += i.toString() + ",";
+      }
+
+      toReturn = toReturn.substring(0, toReturn.length()-1);
+
+      return toReturn;
    }
 
    // Prints a line of dashes of the appropriate length
