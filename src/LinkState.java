@@ -128,7 +128,7 @@ public class LinkState {
       for (Node n : this.nodes) {
          if (!n.equals(sourceNode)) { // not dealing with the source node
             // if neighbor
-            if (sourceNode.getDistanceToNode(n) != -1){
+            if (sourceNode.getDistanceToNode(n) != -1) {
                this.updateDistance(n, sourceNode.getDistanceToNode(n));
                this.updatePValue(n, sourceNode);
             } else { // Not a direct neighbor --> infinity
@@ -159,9 +159,11 @@ public class LinkState {
                   min = this.distances.get(i);
                   toAdd = i;
                } else { // If min is not infinity
-                  if (min >= this.distances.get(i)) { // If the current iterating distance is less than or equal to the current min, replace min with this distance value
-                     min = this.distances.get(i);
-                     toAdd = i;
+                  if (this.distances.get(i) != -1) { // Need to check for infinity here because of how infinity is being represented (-1)
+                     if (min >= this.distances.get(i)) { // If the current iterating distance is less than or equal to the current min, replace min with this distance value
+                        min = this.distances.get(i);
+                        toAdd = i;
+                     }
                   }
                }
             }

@@ -18,17 +18,11 @@ public class Test {
    private static boolean test(String value, ArrayList<Integer> expected, ArrayList<Integer> actual) {
       output += value + ": ";
 
-      // System.out.print(value + ": ");
       boolean result = compareTwoArrayLists(expected, actual);
 
       if (result) {
-         // System.out.print("[PASS]\n");
          output += "[PASS]\n";
       } else {
-         // System.out.print("[FAIL]\n");
-         // System.out.println("Expected " + value + ": " +  "\t" + expected);
-         // System.out.println("Actual " + value + ": " + "\t" + actual);
-
          output += "[FAIL]\n";
          output += "Expected " + value + ": " +  "\t" + expected + "\n";
          output += "Actual " + value + ": " + "\t" + actual + "\n";
@@ -62,6 +56,39 @@ public class Test {
       testPValues.add(5);
 
       boolean overall;
+      overall = test("Distances", testDistances, ls.getDistances());
+      overall = test("P Values", testPValues, ls.getPValues()) & overall;
+
+      System.out.println("Overall result: " + (overall ? "[PASS]" : "[FAIL]"));
+      System.out.println("-------------------------");
+      System.out.println(output);
+
+//*******************************************************************************
+      ls = new LinkState("network2.txt");
+      ls.run(sourceNodeIndex);
+
+      testDistances = new ArrayList<Integer>();
+      testDistances.add(0);
+      testDistances.add(10);
+      testDistances.add(12);
+      testDistances.add(5);
+      testDistances.add(9);
+      testDistances.add(10);
+      testDistances.add(7);
+      testDistances.add(6);
+
+
+      testPValues = new ArrayList<Integer>();
+      testPValues.add(1);
+      testPValues.add(5);
+      testPValues.add(5);
+      testPValues.add(1);
+      testPValues.add(4);
+      testPValues.add(7);
+      testPValues.add(4);
+      testPValues.add(4);
+
+      output = "";
       overall = test("Distances", testDistances, ls.getDistances());
       overall = test("P Values", testPValues, ls.getPValues()) & overall;
 
