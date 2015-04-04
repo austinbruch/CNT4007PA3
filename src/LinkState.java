@@ -37,13 +37,10 @@ public class LinkState {
    // Represents the p(node) values
    private ArrayList<Integer> pValues;
 
-   private String header;
-
    public LinkState(String networkFile) {
       this.networkFile = networkFile;
       this.numNodes = 0;
       this.nodes = new ArrayList<Node>();
-      this.header = null;
       this.distances = new ArrayList<Integer>();
       this.pValues = new ArrayList<Integer>();
       this.nSet = new ArrayList<Integer>();
