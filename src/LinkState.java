@@ -113,111 +113,18 @@ public class LinkState {
 
    }
 
-   // Perform the Dijkstra's Algorithm routing
-   private void route(int sourceNodeIndex) {
-      StepPrinter printer = new StepPrinter(this, sourceNodeIndex);
-
-      printer.printDashedLine();
-      printer.printHeader(sourceNodeIndex);
-      printer.printDashedLine();
-
-      // Initialize N'
-      this.nSet.add(new Integer(sourceNodeIndex));
-
-      Node sourceNode = this.nodes.get(sourceNodeIndex-1);
-
-      for (Node n : this.nodes) {
-         if (!n.equals(sourceNode)) { // not dealing with the source node
-            // if neighbor
-            if (sourceNode.getDistanceToNode(n) != -1) {
-               this.updateDistance(n, sourceNode.getDistanceToNode(n));
-               this.updatePValue(n, sourceNode);
-            } else { // Not a direct neighbor --> infinity
-               this.updateDistance(n, -1);
-            }
-         } else { // Dealing with the source node here
-            this.updateDistance(n, 0); 
-            this.updatePValue(n, n);
-         }
-      }
-
-      printer.printStatusLine(this.step);
-      printer.printDashedLine();
-
-      // Looping stage
-
-      while (this.nSet.size() != this.numNodes) {
-         this.step++;
-         int min = -1;
-         int toAdd = sourceNodeIndex - 1;
-         
-         // Iterate through the distance ArrayList, looking for a minimum Distance value for a node that is not in N'
-         // Iterate backwards because in the case of a tie in the distance, we want to take the node with the smaller node number, as per assignment instructions
-         for (int i = this.distances.size()-1; i >= 0; i--) {
-            int oneBasedIndex = i + 1; 
-            if (!this.nSet.contains(oneBasedIndex)) {
-               if (min == -1) { // If min is infinity, add the next node because it's either smaller or the same
-                  min = this.distances.get(i);
-                  toAdd = i;
-               } else { // If min is not infinity
-                  if (this.distances.get(i) != -1) { // Need to check for infinity here because of how infinity is being represented (-1)
-                     if (min >= this.distances.get(i)) { // If the current iterating distance is less than or equal to the current min, replace min with this distance value
-                        min = this.distances.get(i);
-                        toAdd = i;
-                     }
-                  }
-               }
-            }
-         }
-
-         // At this point, we know the index (0 based) of the Node to add to N'
-         this.nSet.add(toAdd + 1);
-
-         // Update the distances ArrayList (D()) for each node
-         // The new distance value is either the old value, or the least cost value to the node that was just added to N', PLUS the cost from that new node to each node
-
-         Node addedNode = this.nodes.get(toAdd);
-         for (Node n : this.nodes) {
-            if (!this.nSet.contains(n.getNodeIndex())) { // the iterating node isn't in N'
-               // if neighbor
-               if (addedNode.getDistanceToNode(n) != -1) {
-
-                  // If the new path is shorter than the old path, update it to show 
-                  if (this.getDistanceFromNode(n) != -1) {
-                     if (this.getDistanceFromNode(n) > this.getDistanceFromNode(addedNode) + addedNode.getDistanceToNode(n)) {
-                        this.updateDistance(n, this.getDistanceFromNode(addedNode) + addedNode.getDistanceToNode(n));
-                        this.updatePValue(n, addedNode);
-                     }
-                  } else {
-                     this.updateDistance(n, this.getDistanceFromNode(addedNode) + addedNode.getDistanceToNode(n));
-                     this.updatePValue(n, addedNode);
-                  }
-                  
-               } else { // Not a direct neighbor --> infinity
-                  // Do nothing here, don't update the values in either D() or p()
-               }
-            }
-         }
-
-         printer.printStatusLine(this.step);
-         printer.printDashedLine();
-
-      }
-      
-   }
-
    // Wrapping function to get the distance for a certain Node
-   private int getDistanceFromNode(Node node) {
+   protected int getDistanceFromNode(Node node) {
       return this.distances.get(node.getNodeIndex()-1);
    }
 
    // Wrapping function to avoid confusion with the indexing differences between ArrayList containers and Node Indexing
-   private void updateDistance(Node nodeToUpdate, int distance) {
+   protected void updateDistance(Node nodeToUpdate, int distance) {
       this.distances.set(nodeToUpdate.getNodeIndex()-1, distance);
    }
 
    // Wrapping function to avoid confusion with the indexing differences between ArrayList containers and Node Indexing
-   private void updatePValue(Node nodeToUpdate, Node newPValue) {
+   protected void updatePValue(Node nodeToUpdate, Node newPValue) {
       this.pValues.set(nodeToUpdate.getNodeIndex()-1, newPValue.getNodeIndex());
    }
 
@@ -230,7 +137,8 @@ public class LinkState {
       this.parseNetworkFile();
 
       // Find all routes from the specified source Node
-      this.route(sourceNodeIndex);
+      Router router = new Router(this);
+      router.route(sourceNodeIndex);
    }
 
    // Used to drive the LinkState program

@@ -12,8 +12,10 @@ public class StepPrinter {
    // Reference to the related LinkState instance
    private LinkState linkState;
 
+   // The header for the Algorithm printout
    private String header;
 
+   // The index of the Source node for the given Dijkstra's Algorithm execution
    private int sourceNodeIndex;
 
    public StepPrinter(LinkState linkState, int sourceNodeIndex) {
@@ -23,6 +25,7 @@ public class StepPrinter {
       this.initialize();
    }
 
+   // Initialize this StepPrinter
    private void initialize() {
       this.buildHeader();
    }
@@ -54,10 +57,12 @@ public class StepPrinter {
       this.header = header;
    }
 
+   // Prints the Header for the Algorithm's output
    public void printHeader(int sourceNodeIndex) {
       System.out.println(this.header);
    } 
 
+   // Prints the status line of the algorithm, indicating the current status of the Distance Vector and P vector
    public void printStatusLine(int step) {
       String statusLine = "";
 
@@ -82,8 +87,6 @@ public class StepPrinter {
          statusLine += "\t";   
       }
 
-      
-
       for (int i = 0; i < this.linkState.getNodes().size(); i++) {
          int j = i + 1;
          if (j != this.sourceNodeIndex) {
@@ -106,6 +109,7 @@ public class StepPrinter {
       System.out.println(statusLine);
    }
 
+   // Returns a String representation of the sorted version of the N' set of Nodes
    private String getContentsOfNSet() {
       String toReturn = "";
 
