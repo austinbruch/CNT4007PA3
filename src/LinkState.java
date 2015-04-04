@@ -53,6 +53,18 @@ public class LinkState {
       this.step = 0;
    }
 
+   public ArrayList<Integer> getDistances() {
+      return this.distances;
+   }
+
+   public ArrayList<Integer> getPValues() {
+      return this.pValues;
+   }
+
+   public ArrayList<Integer> getNSet() {
+      return this.nSet;
+   }
+
    private void initialize() {
       // Setup the Network File Reader
       try {
@@ -114,12 +126,15 @@ public class LinkState {
       for (Node n : this.nodes) {
          if (!n.equals(sourceNode)) { // not dealing with the source node
             // if neighbor
-            if (sourceNode.getDistanceToNode(n.getNodeIndex()) != -1){
-               this.distances.set(n.getNodeIndex()-1, sourceNode.getDistanceToNode(n.getNodeIndex()));
+            if (sourceNode.getDistanceToNode(n) != -1){
+               this.distances.set(n.getNodeIndex()-1, sourceNode.getDistanceToNode(n));
                this.pValues.set(n.getNodeIndex()-1, sourceNode.getNodeIndex());
             } else { // Not a direct neighbor --> infinity
                this.distances.set(n.getNodeIndex()-1, -1);
             }
+         } else {
+            this.distances.set(n.getNodeIndex()-1, 0);
+            this.pValues.set(n.getNodeIndex()-1, n.getNodeIndex());
          }
       }
 
@@ -160,16 +175,16 @@ public class LinkState {
          for (Node n : this.nodes) {
             if (!this.nSet.contains(n.getNodeIndex())) { // the iterating node isn't in N'
                // if neighbor
-               if (addedNode.getDistanceToNode(n.getNodeIndex()) != -1){
+               if (addedNode.getDistanceToNode(n) != -1){
 
                   // If the new path is shorter than the old path, update it to show 
                   if (this.distances.get(n.getNodeIndex()-1) != -1) {
-                     if (this.distances.get(n.getNodeIndex()-1) > this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n.getNodeIndex())) {
-                        this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n.getNodeIndex()));
+                     if (this.distances.get(n.getNodeIndex()-1) > this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n)) {
+                        this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n));
                         this.pValues.set(n.getNodeIndex()-1, addedNode.getNodeIndex());
                      }
                   } else {
-                     this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n.getNodeIndex()));
+                     this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n));
                      this.pValues.set(n.getNodeIndex()-1, addedNode.getNodeIndex());
                   }
                   
@@ -274,6 +289,18 @@ public class LinkState {
       toReturn = toReturn.substring(0, toReturn.length()-1);
 
       return toReturn;
+   }
+
+   // Returns the maximum length of the N' set printed to the console
+   private int maximumNSetStringLength() {
+      int numCommas = this.numNodes - 1;
+
+      int numbers = 0;
+      for (int i = 1; i <= this.numNodes; i++) {
+         numbers += String.valueOf(i).length();
+      }
+
+      return numCommas + numbers;
    }
 
    // Prints a line of dashes of the appropriate length

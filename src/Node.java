@@ -46,6 +46,10 @@ public class Node {
       // System.out.println("Node: " + this.nodeIndex + " has links: " + this.costs);
    }
 
+   public int getDistanceToNode(Node otherNode) {
+      return this.costs.get(otherNode.getNodeIndex()-1);
+   }
+
    public int getDistanceToNode(int destinationIndex) {
       return this.costs.get(destinationIndex-1);
    }
