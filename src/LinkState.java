@@ -39,9 +39,6 @@ public class LinkState {
 
    private String header;
 
-   // Current step of the routing algorithm
-   private int step;
-
    public LinkState(String networkFile) {
       this.networkFile = networkFile;
       this.numNodes = 0;
@@ -50,7 +47,6 @@ public class LinkState {
       this.distances = new ArrayList<Integer>();
       this.pValues = new ArrayList<Integer>();
       this.nSet = new ArrayList<Integer>();
-      this.step = 0;
    }
 
    public ArrayList<Node> getNodes() {
