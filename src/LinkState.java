@@ -115,10 +115,11 @@ public class LinkState {
 
    // Perform the Dijkstra's Algorithm routing
    private void route(int sourceNodeIndex) {
-      this.header = buildHeader(sourceNodeIndex);
-      this.printDashedLine();
-      System.out.println(header);
-      this.printDashedLine();
+      StepPrinter printer = new StepPrinter(this, sourceNodeIndex);
+
+      printer.printDashedLine();
+      printer.printHeader(sourceNodeIndex);
+      printer.printDashedLine();
 
       // Initialize N'
       this.nSet.add(new Integer(sourceNodeIndex));
@@ -140,8 +141,8 @@ public class LinkState {
          }
       }
 
-      this.printStatusLine(sourceNodeIndex);
-      this.printDashedLine();
+      printer.printStatusLine(this.step);
+      printer.printDashedLine();
 
       // Looping stage
 
@@ -198,123 +199,11 @@ public class LinkState {
             }
          }
 
-         this.printStatusLine(sourceNodeIndex);
-         this.printDashedLine();
+         printer.printStatusLine(this.step);
+         printer.printDashedLine();
+
       }
       
-   }
-
-   // Print the header for the Dijkstra's Algorithm output
-   // Specify which source node we are using to not print columns for that Node
-   private String buildHeader(int sourceNodeIndex) {
-      String header = "";
-
-      header += "Step\t";
-
-      int numTabsNeeded = this.numNodes / 6;
-      if (this.numNodes % 6 != 0) {
-         numTabsNeeded++;
-      }
-
-      header += "N\'";
-
-      for (int i = 0; i <= numTabsNeeded; i++) {
-         header += "\t";
-      }
-
-      for (int i = 1; i <= this.numNodes; i++) {
-         if (i != sourceNodeIndex) {
-            header += "D(" + i + "),p(" + i + ")\t";
-         }
-      }
-
-      return header;
-   }
-
-   private void printStatusLine(int sourceNodeIndex) {
-      String statusLine = "";
-
-      statusLine += this.step + "\t";
-
-      int numTabsNeeded = this.numNodes  / 6;
-      if (this.numNodes % 6 != 0) {
-         numTabsNeeded++;
-      }
-
-      String nSetContents = this.getContentsOfNSet();
-      int numTabsToSubtract = nSetContents.length() / 6;
-      if (nSetContents.length() % 6 != 0 && nSetContents.length() / 6 != 0) {
-         numTabsToSubtract++;
-      }
-
-      numTabsNeeded = numTabsNeeded - numTabsToSubtract;
-      
-      statusLine += nSetContents;
-
-      for (int i = 0; i <= numTabsNeeded; i++) {
-         statusLine += "\t";   
-      }
-
-      
-
-      for (int i = 0; i < this.nodes.size(); i++) {
-         int j = i + 1;
-         if (j != sourceNodeIndex) {
-            if (!this.nSet.contains(j)) {
-            // if (true) { // Debug purposes only
-               int distance = this.distances.get(i);
-               int pValue = this.pValues.get(i);
-
-               if (distance == -1) {
-                  statusLine += "N\t\t";
-               } else {
-                  statusLine += distance + "," + pValue + "\t\t"; 
-               }
-            } else {
-               statusLine += "\t\t";
-              
-         }
-            }
-      }
-      
-      System.out.println(statusLine);
-   }
-
-   private String getContentsOfNSet() {
-      String toReturn = "";
-
-      Collections.sort(this.nSet);
-
-      for (Integer i : nSet) {
-         toReturn += i.toString() + ",";
-      }
-
-      toReturn = toReturn.substring(0, toReturn.length()-1);
-
-      return toReturn;
-   }
-
-   // Returns the maximum length of the N' set printed to the console
-   private int maximumNSetStringLength() {
-      int numCommas = this.numNodes - 1;
-
-      int numbers = 0;
-      for (int i = 1; i <= this.numNodes; i++) {
-         numbers += String.valueOf(i).length();
-      }
-
-      return numCommas + numbers;
-   }
-
-   // Prints a line of dashes of the appropriate length
-   private void printDashedLine() {
-      String dashes = "";
-      int numTabs = this.header.length() - this.header.replace("\t","").length();
-      for (int i = 0; i < this.header.length() + (numTabs * 6); i++) {
-         dashes += "-";
-      }
-
-      System.out.println(dashes);
    }
 
    // Wrapping function to get the distance for a certain Node
