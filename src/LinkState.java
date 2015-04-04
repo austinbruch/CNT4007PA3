@@ -53,6 +53,10 @@ public class LinkState {
       this.step = 0;
    }
 
+   public ArrayList<Node> getNodes() {
+      return this.nodes;
+   }
+
    public ArrayList<Integer> getDistances() {
       return this.distances;
    }
@@ -65,6 +69,7 @@ public class LinkState {
       return this.nSet;
    }
 
+   // Initialize the Reader for the Network File
    private void initialize() {
       // Setup the Network File Reader
       try {
@@ -80,19 +85,18 @@ public class LinkState {
    private void parseNetworkFile() {
 
       int currentNode = 0;
-      String temp = null;
+      String costs = null;
       try {
-         while( (temp = this.networkFileBufferedReader.readLine()) != null ) {
-            if (!temp.equals("EOF.")) {
+         while( (costs = this.networkFileBufferedReader.readLine()) != null ) {
+            if (!costs.equals("EOF.")) {
                this.numNodes++;
                currentNode++;
-               // System.out.println(temp);
 
                Node node = new Node(currentNode);
-               node.parseCosts(temp);
-               this.nodes.add(node);
-               this.distances.add(-1);
-               this.pValues.add(0);
+               node.parseCosts(costs);    // Figure out the costs to other Nodes from the new Node
+               this.nodes.add(node);      // Add the new Node to the list of Nodes
+               this.distances.add(-1);    // Initialize the distances ArrayList
+               this.pValues.add(0);       // Initialize the p-values ArrayList
             }
          }
       } catch (IOException e) {
@@ -106,8 +110,6 @@ public class LinkState {
             System.exit(0);
          }
       }
-
-      // System.out.println("Number of Nodes in this Network: " + this.numNodes);
 
    }
 
@@ -127,14 +129,14 @@ public class LinkState {
          if (!n.equals(sourceNode)) { // not dealing with the source node
             // if neighbor
             if (sourceNode.getDistanceToNode(n) != -1){
-               this.distances.set(n.getNodeIndex()-1, sourceNode.getDistanceToNode(n));
-               this.pValues.set(n.getNodeIndex()-1, sourceNode.getNodeIndex());
+               this.updateDistance(n, sourceNode.getDistanceToNode(n));
+               this.updatePValue(n, sourceNode);
             } else { // Not a direct neighbor --> infinity
-               this.distances.set(n.getNodeIndex()-1, -1);
+               this.updateDistance(n, -1);
             }
-         } else {
-            this.distances.set(n.getNodeIndex()-1, 0);
-            this.pValues.set(n.getNodeIndex()-1, n.getNodeIndex());
+         } else { // Dealing with the source node here
+            this.updateDistance(n, 0); 
+            this.updatePValue(n, n);
          }
       }
 
@@ -175,17 +177,17 @@ public class LinkState {
          for (Node n : this.nodes) {
             if (!this.nSet.contains(n.getNodeIndex())) { // the iterating node isn't in N'
                // if neighbor
-               if (addedNode.getDistanceToNode(n) != -1){
+               if (addedNode.getDistanceToNode(n) != -1) {
 
                   // If the new path is shorter than the old path, update it to show 
-                  if (this.distances.get(n.getNodeIndex()-1) != -1) {
-                     if (this.distances.get(n.getNodeIndex()-1) > this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n)) {
-                        this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n));
-                        this.pValues.set(n.getNodeIndex()-1, addedNode.getNodeIndex());
+                  if (this.getDistanceFromNode(n) != -1) {
+                     if (this.getDistanceFromNode(n) > this.getDistanceFromNode(addedNode) + addedNode.getDistanceToNode(n)) {
+                        this.updateDistance(n, this.getDistanceFromNode(addedNode) + addedNode.getDistanceToNode(n));
+                        this.updatePValue(n, addedNode);
                      }
                   } else {
-                     this.distances.set(n.getNodeIndex()-1, this.distances.get(addedNode.getNodeIndex()-1) + addedNode.getDistanceToNode(n));
-                     this.pValues.set(n.getNodeIndex()-1, addedNode.getNodeIndex());
+                     this.updateDistance(n, this.getDistanceFromNode(addedNode) + addedNode.getDistanceToNode(n));
+                     this.updatePValue(n, addedNode);
                   }
                   
                } else { // Not a direct neighbor --> infinity
@@ -198,7 +200,6 @@ public class LinkState {
          this.printDashedLine();
       }
       
-
    }
 
    // Print the header for the Dijkstra's Algorithm output
@@ -314,17 +315,31 @@ public class LinkState {
       System.out.println(dashes);
    }
 
+   // Wrapping function to get the distance for a certain Node
+   private int getDistanceFromNode(Node node) {
+      return this.distances.get(node.getNodeIndex()-1);
+   }
+
+   // Wrapping function to avoid confusion with the indexing differences between ArrayList containers and Node Indexing
+   private void updateDistance(Node nodeToUpdate, int distance) {
+      this.distances.set(nodeToUpdate.getNodeIndex()-1, distance);
+   }
+
+   // Wrapping function to avoid confusion with the indexing differences between ArrayList containers and Node Indexing
+   private void updatePValue(Node nodeToUpdate, Node newPValue) {
+      this.pValues.set(nodeToUpdate.getNodeIndex()-1, newPValue.getNodeIndex());
+   }
+
    // Execute the LinkState routing process
-   public void run() {
+   public void run(int sourceNodeIndex) {
       // Initialize the Network File Reader
       this.initialize();
 
       // Parse the Network File to create the Network of Nodes
       this.parseNetworkFile();
 
-      // Perform the Dijkstra's Shortest-Path Algorithm on the specified source node
-      // Note: this is hard coded to Node 1 based on assignment specifications
-      this.route(1);
+      // Find all routes from the specified source Node
+      this.route(sourceNodeIndex);
    }
 
    // Used to drive the LinkState program
@@ -336,9 +351,12 @@ public class LinkState {
 
       // Create a LinkState instance with the specified network file
       LinkState linkState = new LinkState(args[0]);
+
+      // Always route from Node 1, based on project specifications
+      int sourceNodeIndex = 1;
       
       // Run the LinkState algorithm
-      linkState.run();
+      linkState.run(sourceNodeIndex);
 
    }
    

@@ -2,6 +2,8 @@ import java.util.ArrayList;
 
 public class Test {
 
+   private static String output = "";
+
    private static boolean compareTwoArrayLists(ArrayList<Integer> one, ArrayList<Integer> two) {
       boolean equal = true;
       for (int i = 0; i < one.size(); i++) {
@@ -13,23 +15,35 @@ public class Test {
       return equal;
    }
 
-   private static void test(String value, ArrayList<Integer> expected, ArrayList<Integer> actual) {
-      System.out.print(value + ": ");
+   private static boolean test(String value, ArrayList<Integer> expected, ArrayList<Integer> actual) {
+      output += value + ": ";
+
+      // System.out.print(value + ": ");
       boolean result = compareTwoArrayLists(expected, actual);
 
       if (result) {
-         System.out.print("[PASS]\n");
+         // System.out.print("[PASS]\n");
+         output += "[PASS]\n";
       } else {
-         System.out.print("[FAIL]\n");
-         System.out.println("Expected " + value + ": " +  "\t" + expected);
-         System.out.println("Actual " + value + ": " + "\t" + actual);
+         // System.out.print("[FAIL]\n");
+         // System.out.println("Expected " + value + ": " +  "\t" + expected);
+         // System.out.println("Actual " + value + ": " + "\t" + actual);
+
+         output += "[FAIL]\n";
+         output += "Expected " + value + ": " +  "\t" + expected + "\n";
+         output += "Actual " + value + ": " + "\t" + actual + "\n";
+
       }
+
+      return result;
    }
 
    public static void main(String... args) {
 
+      int sourceNodeIndex = 1;
+
       LinkState ls = new LinkState("network.txt");
-      ls.run();
+      ls.run(sourceNodeIndex);
 
       ArrayList<Integer> testDistances = new ArrayList<Integer>();
       testDistances.add(0);
@@ -47,8 +61,14 @@ public class Test {
       testPValues.add(4);
       testPValues.add(5);
 
-      test("Distances", testDistances, ls.getDistances());
-      test("P Values", testPValues, ls.getPValues());
+      boolean overall;
+      overall = test("Distances", testDistances, ls.getDistances());
+      overall = test("P Values", testPValues, ls.getPValues()) & overall;
+
+      System.out.println("Overall result: " + (overall ? "[PASS]" : "[FAIL]"));
+      System.out.println("-------------------------");
+      System.out.println(output);
+
       
    }
 
