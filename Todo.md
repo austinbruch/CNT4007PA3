@@ -5,6 +5,8 @@
    - [ ] Node
    - [ ] Router
    - [ ] StepPrinter
+- [ ] Fix Step Printing Layout
+   - [ ] StepPrinter
 - [ ] Move D and P lists, and N' set from LinkState to Router
    - [ ] getDistanceFromNode
    - [ ] updateDistance
