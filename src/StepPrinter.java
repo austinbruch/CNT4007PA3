@@ -9,6 +9,8 @@ import java.util.Collections;
 
 public class StepPrinter {
 
+   public static int TAB_LENGTH = 8;
+
    // Reference to the related LinkState instance
    private LinkState linkState;
 
@@ -18,10 +20,17 @@ public class StepPrinter {
    // The index of the Source node for the given Dijkstra's Algorithm execution
    private int sourceNodeIndex;
 
+   // Integer array used to maintain the index into the step status line each column needs to begin at, for columns N', D(2),p(2), ..., D(N),p(N)
+   private int[] columnIndices;
+
+   private int numNodes;
+
    public StepPrinter(LinkState linkState, int sourceNodeIndex) {
       this.linkState = linkState;
       this.header = null;
       this.sourceNodeIndex = sourceNodeIndex;
+      this.numNodes = this.linkState.getNodes().size();
+      this.columnIndices = new int[this.numNodes];
       this.initialize();
    }
 
@@ -30,27 +39,62 @@ public class StepPrinter {
       this.buildHeader();
    }
 
+   private static String buildRepeatingString(String toRepeat, int howManyTimes) {
+      String toReturn = "";
+      
+      for (int i = 0; i < howManyTimes; i++) {
+         toReturn += toRepeat;
+      }
+      
+      return toReturn;
+   }
+
    // Print the header for the Dijkstra's Algorithm output
    // Specify which source node we are using to not print columns for that Node
    private void buildHeader() {
       String header = "";
 
-      header += "Step\t";
+      // if (String.valueOf(this.numNodes).length() >= 8) { // The Step field will be longer than 8 spaces
+      //    int quotient = String.valueOf(this.numNodes).length() / 8);
+      //    int remainder = String.valueOf(this.numNodes).length() % 8;
 
-      int numTabsNeeded = this.linkState.getNodes().size() / 6;
-      if (this.linkState.getNodes().size() % 6 != 0) {
-         numTabsNeeded++;
+      // } else { // The Step field will be less than 8 spaces
+      //    header += "Step    ";
+      // }
+
+      header += "Step" + StepPrinter.buildRepeatingString(" ", TAB_LENGTH - "Step".length());
+
+      this.columnIndices[0] = ("Step" + StepPrinter.buildRepeatingString(" ", TAB_LENGTH - "Step".length())).length();
+
+      int nSetLength = this.maximumNSetStringLength();
+
+      int quotient = nSetLength / TAB_LENGTH;
+      int remainder = nSetLength % TAB_LENGTH;
+
+      if (remainder != TAB_LENGTH - 1) {
+         this.columnIndices[1] = TAB_LENGTH * (quotient + 1) + this.columnIndices[0]; // This is where D(2),p(2) starts   
+      } else {
+         this.columnIndices[1] = TAB_LENGTH * (quotient + 2) + this.columnIndices[0]; // This is where D(2),p(2) starts   
+      }
+      
+      for (int i = 2; i < this.columnIndices.length; i++) {
+         this.columnIndices[i] = this.columnIndices[i-1] + 2 * TAB_LENGTH;
       }
 
-      header += "N\'";
-
-      for (int i = 0; i <= numTabsNeeded; i++) {
-         header += "\t";
-      }
+      header += "N\'" + StepPrinter.buildRepeatingString(" ",this.columnIndices[1] - this.columnIndices[0] - "N\'".length());
 
       for (int i = 1; i <= this.linkState.getNodes().size(); i++) {
          if (i != this.sourceNodeIndex) {
-            header += "D(" + i + "),p(" + i + ")\t";
+            if (i < this.linkState.getNodes().size()) {
+               String temp = "D(" + i + "),p(" + i + ")";
+               String spaces = StepPrinter.buildRepeatingString(" ", this.columnIndices[i] - this.columnIndices[i-1] - temp.length());
+               header += temp + spaces;
+            } else {
+               String temp = "D(" + i + "),p(" + i + ")";
+               String spaces = StepPrinter.buildRepeatingString(" ", TAB_LENGTH * 2 - temp.length());
+               header += temp + spaces;
+            }
+            
          }
       }
 
@@ -66,26 +110,11 @@ public class StepPrinter {
    public void printStatusLine(int step) {
       String statusLine = "";
 
-      statusLine += step + "\t";
+      statusLine += step;
+      statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[0] - String.valueOf(statusLine).length());
 
-      int numTabsNeeded = this.linkState.getNodes().size()  / 6;
-      if (this.linkState.getNodes().size() % 6 != 0) {
-         numTabsNeeded++;
-      }
-
-      String nSetContents = this.getContentsOfNSet();
-      int numTabsToSubtract = nSetContents.length() / 6;
-      if (nSetContents.length() % 6 != 0 && nSetContents.length() / 6 != 0) {
-         numTabsToSubtract++;
-      }
-
-      numTabsNeeded = numTabsNeeded - numTabsToSubtract;
-      
-      statusLine += nSetContents;
-
-      for (int i = 0; i <= numTabsNeeded; i++) {
-         statusLine += "\t";   
-      }
+      statusLine += this.getContentsOfNSet();
+      statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[1] - String.valueOf(statusLine).length());
 
       for (int i = 0; i < this.linkState.getNodes().size(); i++) {
          int j = i + 1;
@@ -95,17 +124,30 @@ public class StepPrinter {
                int pValue = this.linkState.getPValues().get(i);
 
                if (distance == -1) {
-                  statusLine += "N\t\t";
+                  statusLine += "N";
+                  if (i+1 != this.linkState.getNodes().size()) {
+                     statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[i+1] - String.valueOf(statusLine).length());
+                  } else {
+                     statusLine += StepPrinter.buildRepeatingString(" ", TAB_LENGTH * 2 - "N".length());
+                  }
                } else {
-                  statusLine += distance + "," + pValue + "\t\t"; 
+                  statusLine += Integer.toString(distance) + "," + Integer.toString(pValue); 
+                  if (i+1 != this.linkState.getNodes().size()) {
+                     statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[i+1] - String.valueOf(statusLine).length());
+                  } else {
+                     statusLine += StepPrinter.buildRepeatingString(" ", TAB_LENGTH * 2 - (Integer.toString(distance) + "," + Integer.toString(pValue)).length());
+                  }
                }
             } else {
-               statusLine += "\t\t";
-              
+               if (i+1 != this.linkState.getNodes().size()) {
+                  statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[i+1] - String.valueOf(statusLine).length());
+               } else {
+                  statusLine += StepPrinter.buildRepeatingString(" ", TAB_LENGTH * 2);
+               }
          }
             }
       }
-      
+
       System.out.println(statusLine);
    }
 
@@ -139,8 +181,8 @@ public class StepPrinter {
    // Prints a line of dashes of the appropriate length
    public void printDashedLine() {
       String dashes = "";
-      int numTabs = this.header.length() - this.header.replace("\t","").length();
-      for (int i = 0; i < this.header.length() + (numTabs * 6); i++) {
+      
+      for (int i = 0; i < this.header.length(); i++) {
          dashes += "-";
       }
 
