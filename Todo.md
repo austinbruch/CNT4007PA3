@@ -3,8 +3,8 @@
 - [ ] Thorough Commenting
    - [X] LinkState
    - [X] Node
-   - [ ] Router
-   - [ ] StepPrinter
+   - [X] Router
+   - [X] StepPrinter
 - [X] Fix Step Printing Layout
    - [X] StepPrinter
 - [X] Move D and P lists, and N' set from LinkState to Router
@@ -16,3 +16,4 @@
    - [X] Update Router to reflect these changes
 - [ ] Consider moving access to D, P, and N' ArrayLists from StepPrinter through LinkState instead of Router
    - [ ] Not sure if StepPrinter should know about Router or not...
+- [ ] Consider updating N' to store Nodes instead of Integers representing Nodes
