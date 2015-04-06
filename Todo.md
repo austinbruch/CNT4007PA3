@@ -1,6 +1,6 @@
 #TODO
 
-- [ ] Thorough Commenting
+- [X] Thorough Commenting
    - [X] LinkState
    - [X] Node
    - [X] Router
