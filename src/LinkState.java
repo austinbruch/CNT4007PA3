@@ -11,8 +11,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.StringTokenizer;
 
 public class LinkState {
 
@@ -20,46 +18,29 @@ public class LinkState {
    private String networkFile;
    private BufferedReader networkFileBufferedReader;
 
-   // The number of nodes in the network that this LinkState instance is working with
-   private int numNodes;
-
    // List of all Nodes in this Network, in order from 1 to N
    private ArrayList<Node> nodes;
 
-   // Distances from the specified Source Node to each other Node in the Network
-   // Represents the D(node) values
-   private ArrayList<Integer> distances;
-
-   // Represents the set N'
-   private ArrayList<Integer> nSet;
-
-   // P Values for each Node 
-   // Represents the p(node) values
-   private ArrayList<Integer> pValues;
+   // Router instance variable
+   private Router router;
 
    public LinkState(String networkFile) {
       this.networkFile = networkFile;
-      this.numNodes = 0;
       this.nodes = new ArrayList<Node>();
-      this.distances = new ArrayList<Integer>();
-      this.pValues = new ArrayList<Integer>();
-      this.nSet = new ArrayList<Integer>();
    }
 
    public ArrayList<Node> getNodes() {
       return this.nodes;
    }
 
+   // Only needed for testing purposes
    public ArrayList<Integer> getDistances() {
-      return this.distances;
+      return this.router.getDistances();
    }
 
+   // Only needed for testing purposes
    public ArrayList<Integer> getPValues() {
-      return this.pValues;
-   }
-
-   public ArrayList<Integer> getNSet() {
-      return this.nSet;
+      return this.router.getPValues();
    }
 
    // Initialize the Reader for the Network File
@@ -82,14 +63,11 @@ public class LinkState {
       try {
          while( (costs = this.networkFileBufferedReader.readLine()) != null ) {
             if (!costs.equals("EOF.")) {
-               this.numNodes++;
                currentNode++;
 
                Node node = new Node(currentNode);
                node.parseCosts(costs);    // Figure out the costs to other Nodes from the new Node
                this.nodes.add(node);      // Add the new Node to the list of Nodes
-               this.distances.add(-1);    // Initialize the distances ArrayList
-               this.pValues.add(0);       // Initialize the p-values ArrayList
             }
          }
       } catch (IOException e) {
@@ -106,21 +84,6 @@ public class LinkState {
 
    }
 
-   // Wrapping function to get the distance for a certain Node
-   protected int getDistanceFromNode(Node node) {
-      return this.distances.get(node.getNodeIndex()-1);
-   }
-
-   // Wrapping function to avoid confusion with the indexing differences between ArrayList containers and Node Indexing
-   protected void updateDistance(Node nodeToUpdate, int distance) {
-      this.distances.set(nodeToUpdate.getNodeIndex()-1, distance);
-   }
-
-   // Wrapping function to avoid confusion with the indexing differences between ArrayList containers and Node Indexing
-   protected void updatePValue(Node nodeToUpdate, Node newPValue) {
-      this.pValues.set(nodeToUpdate.getNodeIndex()-1, newPValue.getNodeIndex());
-   }
-
    // Execute the LinkState routing process
    public void run(int sourceNodeIndex) {
       // Initialize the Network File Reader
@@ -130,8 +93,8 @@ public class LinkState {
       this.parseNetworkFile();
 
       // Find all routes from the specified source Node
-      Router router = new Router(this);
-      router.route(sourceNodeIndex);
+      this.router = new Router(this);
+      this.router.route(sourceNodeIndex);
    }
 
    // Used to drive the LinkState program

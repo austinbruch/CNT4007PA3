@@ -11,8 +11,8 @@ public class StepPrinter {
 
    public static int TAB_LENGTH = 8;
 
-   // Reference to the related LinkState instance
-   private LinkState linkState;
+   // Reference to the related Router instance
+   private Router router;
 
    // The header for the Algorithm printout
    private String header;
@@ -25,11 +25,11 @@ public class StepPrinter {
 
    private int numNodes;
 
-   public StepPrinter(LinkState linkState, int sourceNodeIndex) {
-      this.linkState = linkState;
+   public StepPrinter(Router router, int sourceNodeIndex) {
+      this.router = router;
       this.header = null;
       this.sourceNodeIndex = sourceNodeIndex;
-      this.numNodes = this.linkState.getNodes().size();
+      this.numNodes = this.router.getNodes().size();
       this.columnIndices = new int[this.numNodes];
       this.initialize();
    }
@@ -83,9 +83,9 @@ public class StepPrinter {
 
       header += "N\'" + StepPrinter.buildRepeatingString(" ",this.columnIndices[1] - this.columnIndices[0] - "N\'".length());
 
-      for (int i = 1; i <= this.linkState.getNodes().size(); i++) {
+      for (int i = 1; i <= this.router.getNodes().size(); i++) {
          if (i != this.sourceNodeIndex) {
-            if (i < this.linkState.getNodes().size()) {
+            if (i < this.router.getNodes().size()) {
                String temp = "D(" + i + "),p(" + i + ")";
                String spaces = StepPrinter.buildRepeatingString(" ", this.columnIndices[i] - this.columnIndices[i-1] - temp.length());
                header += temp + spaces;
@@ -116,30 +116,30 @@ public class StepPrinter {
       statusLine += this.getContentsOfNSet();
       statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[1] - String.valueOf(statusLine).length());
 
-      for (int i = 0; i < this.linkState.getNodes().size(); i++) {
+      for (int i = 0; i < this.router.getNodes().size(); i++) {
          int j = i + 1;
          if (j != this.sourceNodeIndex) {
-            if (!this.linkState.getNSet().contains(j)) {
-               int distance = this.linkState.getDistances().get(i);
-               int pValue = this.linkState.getPValues().get(i);
+            if (!this.router.getNSet().contains(j)) {
+               int distance = this.router.getDistances().get(i);
+               int pValue = this.router.getPValues().get(i);
 
                if (distance == -1) {
                   statusLine += "N";
-                  if (i+1 != this.linkState.getNodes().size()) {
+                  if (i+1 != this.router.getNodes().size()) {
                      statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[i+1] - String.valueOf(statusLine).length());
                   } else {
                      statusLine += StepPrinter.buildRepeatingString(" ", TAB_LENGTH * 2 - "N".length());
                   }
                } else {
                   statusLine += Integer.toString(distance) + "," + Integer.toString(pValue); 
-                  if (i+1 != this.linkState.getNodes().size()) {
+                  if (i+1 != this.router.getNodes().size()) {
                      statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[i+1] - String.valueOf(statusLine).length());
                   } else {
                      statusLine += StepPrinter.buildRepeatingString(" ", TAB_LENGTH * 2 - (Integer.toString(distance) + "," + Integer.toString(pValue)).length());
                   }
                }
             } else {
-               if (i+1 != this.linkState.getNodes().size()) {
+               if (i+1 != this.router.getNodes().size()) {
                   statusLine += StepPrinter.buildRepeatingString(" ", this.columnIndices[i+1] - String.valueOf(statusLine).length());
                } else {
                   statusLine += StepPrinter.buildRepeatingString(" ", TAB_LENGTH * 2);
@@ -155,9 +155,9 @@ public class StepPrinter {
    private String getContentsOfNSet() {
       String toReturn = "";
 
-      Collections.sort(this.linkState.getNSet());
+      Collections.sort(this.router.getNSet());
 
-      for (Integer i : this.linkState.getNSet()) {
+      for (Integer i : this.router.getNSet()) {
          toReturn += i.toString() + ",";
       }
 
@@ -168,10 +168,10 @@ public class StepPrinter {
 
    // Returns the maximum length of the N' set printed to the console
    private int maximumNSetStringLength() {
-      int numCommas = this.linkState.getNodes().size() - 1;
+      int numCommas = this.router.getNodes().size() - 1;
 
       int numbers = 0;
-      for (int i = 1; i <= this.linkState.getNodes().size(); i++) {
+      for (int i = 1; i <= this.router.getNodes().size(); i++) {
          numbers += String.valueOf(i).length();
       }
 
