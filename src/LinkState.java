@@ -24,11 +24,13 @@ public class LinkState {
    // Router instance variable
    private Router router;
 
+   // Constructor that takes in a string representing the file where the network matrix will be read from
    public LinkState(String networkFile) {
       this.networkFile = networkFile;
       this.nodes = new ArrayList<Node>();
    }
 
+   // Accessor to get the ArrayList of Nodes for this LinkState instance
    public ArrayList<Node> getNodes() {
       return this.nodes;
    }
@@ -61,13 +63,14 @@ public class LinkState {
       int currentNode = 0;
       String costs = null;
       try {
+         // Read in each line of the Network file individually
          while( (costs = this.networkFileBufferedReader.readLine()) != null ) {
-            if (!costs.equals("EOF.")) {
-               currentNode++;
+            if (!costs.equals("EOF.")) {           // As long as we're not at the end of the file
+               currentNode++;                      // We've seen one more node in the network
 
-               Node node = new Node(currentNode);
-               node.parseCosts(costs);    // Figure out the costs to other Nodes from the new Node
-               this.nodes.add(node);      // Add the new Node to the list of Nodes
+               Node node = new Node(currentNode);  // Create a new Node instance
+               node.parseCosts(costs);             // Figure out the costs to other Nodes from the new Node
+               this.nodes.add(node);               // Add the new Node to the list of Nodes
             }
          }
       } catch (IOException e) {
